@@ -19,8 +19,8 @@ module Text.Regex.TDFA.Text.Lazy(
  ,CompOption
  ,ExecOption
  ,compile
- ,execute
- ,regexec
+--  ,execute
+--  ,regexec
  ) where
 
 import Data.Array.IArray((!),elems,amap)
@@ -38,16 +38,16 @@ import Text.Regex.TDFA.NewDFA.Uncons(Uncons(uncons))
 import qualified Text.Regex.TDFA.NewDFA.Engine as Engine(execMatch)
 import qualified Text.Regex.TDFA.NewDFA.Tester as Tester(matchTest)
 
-instance Extract L.Text where
-  before = L.take . toEnum; after = L.drop . toEnum; empty = L.empty
+-- instance Extract L.Text where
+--   before = L.take . toEnum; after = L.drop . toEnum; empty = L.empty
 
-instance RegexContext Regex L.Text L.Text where
-  match = polymatch
-  matchM = polymatchM
+-- instance RegexContext Regex L.Text L.Text where
+--   match = polymatch
+--   matchM = polymatchM
 
-instance Uncons L.Text where
-  {- INLINE uncons #-}
-  uncons = L.uncons
+-- instance Uncons L.Text where
+--   {- INLINE uncons #-}
+--   uncons = L.uncons
 
 instance RegexMaker Regex CompOption ExecOption L.Text where
   makeRegexOptsM c e source = makeRegexOptsM c e (L.unpack source)
@@ -60,28 +60,28 @@ execMatch = Engine.execMatch
 myMatchTest :: Uncons text => Regex -> text -> Bool
 myMatchTest = Tester.matchTest
 
-instance RegexLike Regex L.Text where
-  matchOnce r s = listToMaybe (matchAll r s)
-  matchAll r s = execMatch r 0 '\n' s
-  matchCount r s = length (matchAll r' s)
-    where r' = r { regex_execOptions = (regex_execOptions r) {captureGroups = False} }
-  matchTest = myMatchTest
-  matchOnceText regex source =
-    fmap (\ ma ->
-            let (o,l) = ma!0
-            in (before o source
-               ,fmap (\ ol -> (extract ol source,ol)) ma
-               ,after (o+l) source))
-         (matchOnce regex source)
-  matchAllText regex source =
-    let go i _ _ | i `seq` False = undefined
-        go _i _t [] = []
-        go i t (x:xs) =
-          let (off0,len0) = x!0
-              trans pair@(off,len) = (extract (off-i,len) t,pair)
-              t' = after (off0+(len0-i)) t
-          in fmap trans x : seq t' (go (off0+len0) t' xs)
-    in go 0 source (matchAll regex source)
+-- instance RegexLike Regex L.Text where
+--   matchOnce r s = listToMaybe (matchAll r s)
+--   matchAll r s = execMatch r 0 '\n' s
+--   matchCount r s = length (matchAll r' s)
+--     where r' = r { regex_execOptions = (regex_execOptions r) {captureGroups = False} }
+--   matchTest = myMatchTest
+--   matchOnceText regex source =
+--     fmap (\ ma ->
+--             let (o,l) = ma!0
+--             in (before o source
+--                ,fmap (\ ol -> (extract ol source,ol)) ma
+--                ,after (o+l) source))
+--          (matchOnce regex source)
+--   matchAllText regex source =
+--     let go i _ _ | i `seq` False = undefined
+--         go _i _t [] = []
+--         go i t (x:xs) =
+--           let (off0,len0) = x!0
+--               trans pair@(off,len) = (extract (off-i,len) t,pair)
+--               t' = after (off0+(len0-i)) t
+--           in fmap trans x : seq t' (go (off0+len0) t' xs)
+--     in go 0 source (matchAll regex source)
 
 compile :: CompOption -- ^ Flags (summed together)
         -> ExecOption -- ^ Flags (summed together)
@@ -92,18 +92,18 @@ compile compOpt execOpt txt =
     Left err -> Left ("parseRegex for Text.Regex.TDFA.Text.Lazy failed:"++show err)
     Right pattern -> Right (patternToRegex pattern compOpt execOpt)
 
-execute :: Regex      -- ^ Compiled regular expression
-        -> L.Text -- ^ Text to match against
-        -> Either String (Maybe MatchArray)
-execute r txt = Right (matchOnce r txt)
+-- execute :: Regex      -- ^ Compiled regular expression
+--         -> L.Text -- ^ Text to match against
+--         -> Either String (Maybe MatchArray)
+-- execute r txt = Right (matchOnce r txt)
 
-regexec :: Regex      -- ^ Compiled regular expression
-        -> L.Text -- ^ Text to match against
-        -> Either String (Maybe (L.Text, L.Text, L.Text, [L.Text]))
-regexec r txt =
-  case matchOnceText r txt of
-    Nothing -> Right (Nothing)
-    Just (pre,mt,post) ->
-      let main = fst (mt!0)
-          rest = map fst (tail (elems mt)) -- will be []
-      in Right (Just (pre,main,post,rest))
+-- regexec :: Regex      -- ^ Compiled regular expression
+--         -> L.Text -- ^ Text to match against
+--         -> Either String (Maybe (L.Text, L.Text, L.Text, [L.Text]))
+-- regexec r txt =
+--   case matchOnceText r txt of
+--     Nothing -> Right (Nothing)
+--     Just (pre,mt,post) ->
+--       let main = fst (mt!0)
+--           rest = map fst (tail (elems mt)) -- will be []
+--       in Right (Just (pre,main,post,rest))
