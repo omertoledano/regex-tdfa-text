@@ -41,9 +41,9 @@ import qualified Text.Regex.TDFA.NewDFA.Tester as Tester(matchTest)
 instance Extract T.Text where
   before = T.take; after = T.drop; empty = T.empty
 
-instance Uncons T.Text where
-  {- INLINE uncons #-}
-  uncons = T.uncons
+-- instance Uncons T.Text where
+--   {- INLINE uncons #-}
+--   uncons = T.uncons
 
 instance RegexContext Regex T.Text T.Text where
   match = polymatch
